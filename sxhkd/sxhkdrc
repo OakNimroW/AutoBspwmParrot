@@ -27,7 +27,7 @@ super + Return
 	kitty
 
 # rofi launcher
-super + shift + d
+super + d
 	/home/user_replace/.config/rofi/launcher/launcher.sh
 
 # rofi powermenu

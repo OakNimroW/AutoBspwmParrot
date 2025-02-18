@@ -679,6 +679,9 @@ done
 #     fi
 # done
 
+# AGREGANDO ZSH-PLUGINS (GUARDAR ESTO EN UNA FUNCION)
+#cp -r ./zsh-autosuggestions /usr/share
+
 # SUSTITUIMOS USER_REPLACE POR EL USUARIO ELEGIDO
 echo -e "\e[32m[*]\e[0m Configurando ficheros ...\n"
 sed -i "s/user_replace/$input_username/g" /home/$input_username/.config/polybar/config.ini
