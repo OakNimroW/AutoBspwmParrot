@@ -1,14 +1,17 @@
 #!/bin/bash
 
-label="%{F#E784A7}󰃠"
+label="%{F#E784A7}󰃞"
 bar_width=10
 bar_fill="━"
 bar_empty="━"
 color_fill="#E784A7"
 color_empty="#DEE1E6"
 
-brightness=$(cat /sys/class/backlight/*/brightness)
-max_brightness=$(cat /sys/class/backlight/*/max_brightness)
+#brightness=$(cat /sys/class/backlight/*/brightness)
+#max_brightness=$(cat /sys/class/backlight/*/max_brightness)
+
+brightness="1200"
+max_brightness="1666"
 
 percent=$(( brightness * 100 / max_brightness ))
 
@@ -25,3 +28,4 @@ for ((i = 0; i < empty; i++)); do
 done
 
 echo -e "$label $bar"
+

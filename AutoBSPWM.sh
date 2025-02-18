@@ -54,42 +54,13 @@ while true; do
 done
 
 # ACTUALIZAMOS EL SISTEMA
-while true; do
-    read -p "$(echo -e "\e[33m[*]\e[0m ¿Deseas realizar un 'apt update' en el sistema? (SI/NO): ")" response
-    response=$(echo "$response" | tr '[:upper:]' '[:lower:]')
-
-    if [ "$response" = "si" ] || [ "$response" = "s" ]; then
-        echo -e "\e[32m[*]\e[0m Ejecutando 'apt update' ...\n"
-        apt update 
-        break
-    elif [ "$response" = "no" ] || [ "$response" = "n" ]; then
-        echo -e "\e[31m[*]\e[0m Operación 'apt update' cancelada.\n"
-        break
-    else
-        echo -e "\e[31m[*]\e[0m Respuesta no válida. Por favor, responde 'SI' o 'NO'.\n"
-    fi
-done
-
-# UPGRADEAMOS EL SISTEMA
-while true; do
-    read -p "$(echo -e "\e[33m[*]\e[0m ¿Deseas realizar un 'full-upgrade' en el sistema? (SI/NO): ")" response
-    response=$(echo "$response" | tr '[:upper:]' '[:lower:]')
-
-    if [ "$response" = "si" ] || [ "$response" = "s" ]; then
-        echo -e "\e[32m[*]\e[0m Ejecutando 'apt full-upgrade' ...\n"
-        apt full-upgrade -y 
-        break
-    elif [ "$response" = "no" ] || [ "$response" = "n" ]; then
-        echo -e "\e[31m[*]\e[0m Operación 'apt full-upgrade' cancelada.\n"
-        break
-    else
-        echo -e "\e[31m[*]\e[0m Respuesta no válida. Por favor, responde 'SI' o 'NO'.\n"
-    fi
-done
+echo "[+] Actualizacion del sistema."
+sudo parrot-upgrade
+sudo parrot-upgrade
 
 # INSTALAMOS LAS DEPENDENCIAS NECESARIAS
 echo -e "\e[32m[*]\e[0m Instalando las dependencias necesarias ...\n"
-apt install imagemagick feh xclip bspwm sxhkd wmname fastfetch polybar betterlockscreen bat lsd fzf flameshot picom rofi kitty zsh jq pulseaudio-utils seclists bloodhound neo4j x11-utils moreutils -y
+apt install imagemagick feh xclip bspwm sxhkd polybar bat lsd fzf flameshot rofi kitty zsh jq pulseaudio-utils seclists bloodhound neo4j x11-utils moreutils xbacklight -y
 
 # ELIMINAMOS LAS CONFIGURACIONES ANTIGUAS
 echo -e "\e[32m[*]\e[0m Eliminando antiguas configuraciones ...\n"
@@ -120,10 +91,6 @@ cp -r fonts /usr/local/share
 # CONFIGURANDO WALLPAPERS
 echo -e "\e[32m[*]\e[0m Configurando wallpapers ...\n"
 cp -r Wallpapers /home/$input_username
-
-# CONFIGURANDO BETTERLOCKSCREEN
-echo -e "\e[32m[*]\e[0m Configurando betterlockscreen ...\n"
-su $input_username -c "betterlockscreen -u /home/$input_username/Wallpapers/wallpaper.jpg"
 
 # CONFIGURANDO SXHKD
 echo -e "\e[32m[*]\e[0m Configurando sxhkd ...\n"
@@ -188,26 +155,6 @@ sh -c "echo 'source ~/powerlevel10k/powerlevel10k.zsh-theme' >> /root/.zshrc"
 cp .p10k.zsh /root 
 cp .zshrc /root
 
-# FUNCIONES DE INSTALACIÓN Y CONFIGURACIÓN
-instalacion_drivers_nvidia(){
-    while true; do
-        read -p "$(echo -e "\e[33m[*]\e[0m ¿Deseas instalar los DRIVERS PROPIETARIOS de NVIDIA? (SI/NO): ")" response
-        response=$(echo "$response" | tr '[:upper:]' '[:lower:]')
-      
-        if [ "$response" = "si" ] || [ "$response" = "s" ]; then
-            echo -e "\e[32m[*]\e[0m Instalando los drivers propietarios de nvidia ...\n"
-            apt install nvidia-detect nvidia-smi nvidia-driver nvidia-cuda-toolkit -y
-            apt install $(apt-cache pkgnames | grep -E '^linux-headers-[0-9]+\.[0-9]+\.[0-9]+-amd64$' | sort -V | tail -n 1) -y
-            break
-        elif [ "$response" = "no" ] || [ "$response" = "n" ]; then
-            echo -e "\e[31m[*]\e[0m Los drivers propietarios de nvidia no han sido instalados.\n"
-            break
-        else
-            echo -e "\e[31m[*]\e[0m Respuesta no válida. Por favor, responde 'SI' o 'NO'.\n"
-        fi
-    done
-}
-
 configuracion_tecla_fn(){
     while true; do
         read -p "$(echo -e "\e[33m[*]\e[0m Pon el puntero del ratón encima de la ventana blanca e introduce el parámetro que te aprece en la consola para $1: ")" response
@@ -247,24 +194,6 @@ configuracion_shortcuts(){
             configuracion_tecla_fn "bajar el brillo"
             sustituir_shortcut_sxhkdrc "super + F2"
             echo -e "\e[33m[*]\e[0m Ya puedes cerrar la ventana blanca y la consola en la que se muestra el output ...\n"
-            break
-        else
-            echo -e "\e[31m[*]\e[0m Respuesta no válida. Por favor, responde 'SI' o 'NO'.\n"
-        fi
-    done
-}
-
-activar_clipboard_bidireccional(){
-    while true; do
-        read -p "$(echo -e "\e[33m[*]\e[0m ¿Estas usando vmware y deseas activar la clipboard bidireccional? (SI/NO): ")" response
-        response=$(echo "$response" | tr '[:upper:]' '[:lower:]')
-      
-        if [ "$response" = "si" ] || [ "$response" = "s" ]; then
-            echo -e "\e[32m[*]\e[0m La clipboard bidireccional ha sido configurada con éxito.\n"
-            break
-        elif [ "$response" = "no" ] || [ "$response" = "n" ]; then
-            echo -e "\e[31m[*]\e[0m La clipboard bidireccional no ha sido activada.\n"
-            sed -i '/# bidirectional clipboard/,+2d' /home/$input_username/.config/bspwm/bspwmrc 
             break
         else
             echo -e "\e[31m[*]\e[0m Respuesta no válida. Por favor, responde 'SI' o 'NO'.\n"
@@ -460,6 +389,12 @@ instalacion_chrome(){
     done
 }
 
+instalacion_obsidian(){
+    echo -e "\e[32m[*]\e[0m Instalando obsidian ..."
+    wget -O obsidian_1.8.7_amd64.deb https://github.com/obsidianmd/obsidian-releases/releases/download/v1.8.7/obsidian_1.8.7_amd64.deb
+    dpkg -i obsidian_1.8.7_amd64.deb
+}
+
 customizacion_grub_timeout(){
     while true; do
         read -p "$(echo -e "\e[33m[*]\e[0m Introduce el número de segundos que se mostrará grub (si introduces -1 no dejará de mostrarse hasta que lo selecciones manualmente): ")" response
@@ -556,7 +491,6 @@ while true; do
         sed -i '/^vsync = true$/d' /home/$input_username/.config/picom/picom.conf   
 
         eliminar_configuracion_portatil
-        activar_clipboard_bidireccional
         break
     elif [ "$response" = "no" ] || [ "$response" = "n" ]; then
         echo -e "\e[32m[*]\e[0m Se está configurando el sistema para un sistema nativo ...\n"
@@ -569,25 +503,6 @@ while true; do
 
         advertencia
         configuacion_portatil_sobremesa
-        instalacion_drivers_nvidia
-        break
-    else
-        echo -e "\e[31m[*]\e[0m Respuesta no válida. Por favor, responde 'SI' o 'NO'.\n"
-    fi
-done
-
-# CUSTOMIZACIÓN GRUB
-while true; do
-    read -p "$(echo -e "\e[33m[*]\e[0m ¿Deseas customizar grub? (SI/NO): ")" response
-    response=$(echo "$response" | tr '[:upper:]' '[:lower:]')
-
-   if [ "$response" = "si" ] || [ "$response" = "s" ]; then
-        customizacion_grub_timeout
-        customizacion_grub_theme
-        update-grub
-        break
-   elif [ "$response" = "no" ] || [ "$response" = "n" ]; then
-        echo -e "\e[31m[*]\e[0m Grub no será modificado.\n"
         break
     else
         echo -e "\e[31m[*]\e[0m Respuesta no válida. Por favor, responde 'SI' o 'NO'.\n"
@@ -600,7 +515,7 @@ while true; do
     response=$(echo "$response" | tr '[:upper:]' '[:lower:]')
 
     if [ "$response" = "si" ] || [ "$response" = "s" ]; then
-        apt install obsidian -y
+        instalacion_obsidian
         break
     elif [ "$response" = "no" ] || [ "$response" = "n" ]; then
         echo -e "\e[31m[*]\e[0m obsidian no ha sido instalado.\n"
@@ -609,55 +524,69 @@ while true; do
     else
         echo -e "\e[31m[*]\e[0m Respuesta no válida. Por favor, responde 'SI' o 'NO'.\n"
     fi
+
+        read -p "$(echo -e "\e[33m[*]\e[0m ¿Quieres instalar GOOGLE CHROME? (SI/NO): ")" response
+    response=$(echo "$response" | tr '[:upper:]' '[:lower:]')
+
+    if [ "$response" = "si" ] || [ "$response" = "s" ]; then
+        instalacion_chrome
+        break
+    elif [ "$response" = "no" ] || [ "$response" = "n" ]; then
+        echo -e "\e[31m[*]\e[0m Chrome no ha sido instalado.\n"
+        break
+    else
+        echo -e "\e[31m[*]\e[0m Respuesta no válida. Por favor, responde 'SI' o 'NO'.\n"
+    fi
+
 done
 
 # KERBRUTE
-while true; do
-    read -p "$(echo -e "\e[33m[*]\e[0m ¿Quieres instalar KERBRUTE? (SI/NO): ")" response
-    response=$(echo "$response" | tr '[:upper:]' '[:lower:]')
+# while true; do
+#     read -p "$(echo -e "\e[33m[*]\e[0m ¿Quieres instalar KERBRUTE? (SI/NO): ")" response
+#     response=$(echo "$response" | tr '[:upper:]' '[:lower:]')
 
-    if [ "$response" = "si" ] || [ "$response" = "s" ]; then
-        instalacion_kerbrute
-        break
-    elif [ "$response" = "no" ] || [ "$response" = "n" ]; then
-        echo -e "\e[31m[*]\e[0m kerbrute no ha sido instalado.\n"
-        break
-    else
-        echo -e "\e[31m[*]\e[0m Respuesta no válida. Por favor, responde 'SI' o 'NO'.\n"
-    fi
-done
+#     if [ "$response" = "si" ] || [ "$response" = "s" ]; then
+#         instalacion_kerbrute
+#         break
+#     elif [ "$response" = "no" ] || [ "$response" = "n" ]; then
+#         echo -e "\e[31m[*]\e[0m kerbrute no ha sido instalado.\n"
+#         break
+#     else
+#         echo -e "\e[31m[*]\e[0m Respuesta no válida. Por favor, responde 'SI' o 'NO'.\n"
+#     fi
+# done
 
 # WINDAPSEARCH
-while true; do
-    read -p "$(echo -e "\e[33m[*]\e[0m ¿Quieres instalar WINDAPSEARCH? (SI/NO): ")" response
-    response=$(echo "$response" | tr '[:upper:]' '[:lower:]')
+# while true; do
+#     read -p "$(echo -e "\e[33m[*]\e[0m ¿Quieres instalar WINDAPSEARCH? (SI/NO): ")" response
+#     response=$(echo "$response" | tr '[:upper:]' '[:lower:]')
 
-    if [ "$response" = "si" ] || [ "$response" = "s" ]; then
-        instalacion_windapsearch
-        break
-    elif [ "$response" = "no" ] || [ "$response" = "n" ]; then
-        echo -e "\e[31m[*]\e[0m Windapsearch no ha sido instalado.\n"
-        break
-    else
-        echo -e "\e[31m[*]\e[0m Respuesta no válida. Por favor, responde 'SI' o 'NO'.\n"
-    fi
-done
+#     if [ "$response" = "si" ] || [ "$response" = "s" ]; then
+#         instalacion_windapsearch
+#         break
+#     elif [ "$response" = "no" ] || [ "$response" = "n" ]; then
+#         echo -e "\e[31m[*]\e[0m Windapsearch no ha sido instalado.\n"
+#         break
+#     else
+#         echo -e "\e[31m[*]\e[0m Respuesta no válida. Por favor, responde 'SI' o 'NO'.\n"
+#     fi
+# done
 
 # RPCENUM
-while true; do
-    read -p "$(echo -e "\e[33m[*]\e[0m ¿Quieres instalar RPCENUM? (SI/NO): ")" response
-    response=$(echo "$response" | tr '[:upper:]' '[:lower:]')
+# while true; do
+#     read -p "$(echo -e "\e[33m[*]\e[0m ¿Quieres instalar RPCENUM? (SI/NO): ")" response
+#     response=$(echo "$response" | tr '[:upper:]' '[:lower:]')
 
-    if [ "$response" = "si" ] || [ "$response" = "s" ]; then
-        instalacion_rpcEnum
-        break
-    elif [ "$response" = "no" ] || [ "$response" = "n" ]; then
-        echo -e "\e[31m[*]\e[0m rpcEnum no ha sido instalado.\n"
-        break
-    else
-        echo -e "\e[31m[*]\e[0m Respuesta no válida. Por favor, responde 'SI' o 'NO'.\n"
-    fi
-done
+#     if [ "$response" = "si" ] || [ "$response" = "s" ]; then
+#         instalacion_rpcEnum
+#         break
+#     elif [ "$response" = "no" ] || [ "$response" = "n" ]; then
+#         echo -e "\e[31m[*]\e[0m rpcEnum no ha sido instalado.\n"
+#         break
+#     else
+#         echo -e "\e[31m[*]\e[0m Respuesta no válida. Por favor, responde 'SI' o 'NO'.\n"
+#     fi
+# done
 
 # CHROME
 while true; do
@@ -695,22 +624,22 @@ while true; do
 done
 
 # NVIM
-while true; do
-    read -p "$(echo -e "\e[33m[*]\e[0m ¿Quieres instalar NVIM? (SI/NO): ")" response
-    response=$(echo "$response" | tr '[:upper:]' '[:lower:]')
+# while true; do
+#     read -p "$(echo -e "\e[33m[*]\e[0m ¿Quieres instalar NVIM? (SI/NO): ")" response
+#     response=$(echo "$response" | tr '[:upper:]' '[:lower:]')
 
-    if [ "$response" = "si" ] || [ "$response" = "s" ]; then
-        instalacion_nvim
-        break
-    elif [ "$response" = "no" ] || [ "$response" = "n" ]; then
-        echo -e "\e[31m[*]\e[0m Nvim no ha sido instalado.\n"
-        sed -i '/# nvim/,+2d' /home/$input_username/.zshrc
-        sed -i '/# nvim/,+2d' /root/.zshrc
-        break
-    else
-        echo -e "\e[31m[*]\e[0m Respuesta no válida. Por favor, responde 'SI' o 'NO'.\n"
-    fi
-done
+#     if [ "$response" = "si" ] || [ "$response" = "s" ]; then
+#         instalacion_nvim
+#         break
+#     elif [ "$response" = "no" ] || [ "$response" = "n" ]; then
+#         echo -e "\e[31m[*]\e[0m Nvim no ha sido instalado.\n"
+#         sed -i '/# nvim/,+2d' /home/$input_username/.zshrc
+#         sed -i '/# nvim/,+2d' /root/.zshrc
+#         break
+#     else
+#         echo -e "\e[31m[*]\e[0m Respuesta no válida. Por favor, responde 'SI' o 'NO'.\n"
+#     fi
+# done
 
 # VSCODE
 while true; do
@@ -730,25 +659,25 @@ while true; do
 done
 
 # JETBRAINS TOOLBOX
-while true; do
-    read -p "$(echo -e "\e[33m[*]\e[0m ¿Quieres instalar JETBRAINS TOOLBOX? (SI/NO): ")" response
-    response=$(echo "$response" | tr '[:upper:]' '[:lower:]')
+# while true; do
+#     read -p "$(echo -e "\e[33m[*]\e[0m ¿Quieres instalar JETBRAINS TOOLBOX? (SI/NO): ")" response
+#     response=$(echo "$response" | tr '[:upper:]' '[:lower:]')
 
-    if [ "$response" = "si" ] || [ "$response" = "s" ]; then
-        instalacion_jetbrains_toolbox
-        break
-    elif [ "$response" = "no" ] || [ "$response" = "n" ]; then
-        sed -i '/# jetbrains toolbox/,+2d' /home/$input_username/.zshrc
-        sed -i '/# jetbrains toolbox/,+2d' /root/.zshrc
-        sed -i '/# pycharm/,+3d' /home/$input_username/.config/sxhkd/sxhkdrc
-        sed -i '/# pycharm/,+2d' /home/$input_username/.zshrc
-        sed -i '/# pycharm/,+2d' /root/.zshrc
-        echo -e "\e[31m[*]\e[0m Jetbrains toolbox no ha sido instalada.\n"
-        break
-    else
-        echo -e "\e[31m[*]\e[0m Respuesta no válida. Por favor, responde 'SI' o 'NO'.\n"
-    fi
-done
+#     if [ "$response" = "si" ] || [ "$response" = "s" ]; then
+#         instalacion_jetbrains_toolbox
+#         break
+#     elif [ "$response" = "no" ] || [ "$response" = "n" ]; then
+#         sed -i '/# jetbrains toolbox/,+2d' /home/$input_username/.zshrc
+#         sed -i '/# jetbrains toolbox/,+2d' /root/.zshrc
+#         sed -i '/# pycharm/,+3d' /home/$input_username/.config/sxhkd/sxhkdrc
+#         sed -i '/# pycharm/,+2d' /home/$input_username/.zshrc
+#         sed -i '/# pycharm/,+2d' /root/.zshrc
+#         echo -e "\e[31m[*]\e[0m Jetbrains toolbox no ha sido instalada.\n"
+#         break
+#     else
+#         echo -e "\e[31m[*]\e[0m Respuesta no válida. Por favor, responde 'SI' o 'NO'.\n"
+#     fi
+# done
 
 # SUSTITUIMOS USER_REPLACE POR EL USUARIO ELEGIDO
 echo -e "\e[32m[*]\e[0m Configurando ficheros ...\n"
